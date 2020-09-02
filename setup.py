@@ -5,7 +5,7 @@
 from setuptools import setup
 
 
-package_name = 'starter_pack'
+package_name = 'starter_app'
 
 
 def get_version():
@@ -53,8 +53,8 @@ setup(
     long_description=get_long_description(),
     long_description_content_type='text/markdown'
     packages=[
-        'starter_pack',
-        'starter_pack/_module'
+        'starter_app',
+        'starter_app/_module'
     ],
     # Or use (make sure find_packages is imported from setuptools):
     #packages=find_packages(),
