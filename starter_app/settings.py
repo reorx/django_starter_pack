@@ -22,9 +22,10 @@ Sections:
 - ## Rewrite and thiry party setup ##
 """
 
-## Django basic ##
-
+import os
 from pathlib import Path
+
+## Django basic ##
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -127,23 +128,18 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 ## Logging ##
+
+# LOG_FORMAT = '[%(name)s] %(levelname)s %(message)s t=%(asctime)s p=%(pathname)s:%(lineno)d'
+LOG_FORMAT = '%(asctime)s  %(levelname)s  %(name)-10s  %(message)s'
+
+# LOG_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
+LOG_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'loggers': {
-        'mss': {
-            'handlers': ['stream'],
-            'level': 'INFO',
-        },
-        'mssapi': {
-            'handlers': ['stream'],
-            'level': 'INFO',
-        },
-        'msshelpers': {
-            'handlers': ['stream'],
-            'level': 'INFO',
-        },
-        'mssvendor': {
+        'starter_app': {
             'handlers': ['stream'],
             'level': 'INFO',
         },
@@ -163,11 +159,6 @@ LOGGING = {
         'requests': {
             'level': 'WARNING',
             'handlers': ['stream'],
-            'propagate': 0,
-        },
-        'apibox': {
-            'handlers': ['stream'],
-            'level': 'INFO',
             'propagate': 0,
         },
     },
