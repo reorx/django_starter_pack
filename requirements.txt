@@ -1,2 +1,3 @@
 Django
 PyMySQL
+django_static_collector

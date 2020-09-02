@@ -1,0 +1,23 @@
+---
+name: starter_app
+auto_version: true
+project_type: python
+python:
+  requirements_paths:
+    - requirements.txt
+  site_packages_build_mode: target
+build_dir: build
+dist_dir: dist
+pre_script: |
+    echo "release = '{version}'" > {build_path}/release_version.py
+    {python[venv_path]}/bin/django-static-collector mt_backend.settings
+post_script: |
+  find {build_path} -type d -path '*django*locale/*' ! -path '*locale/en/*' ! -path '*locale/en' | xargs rm -rf
+  find {build_path} -type d -path '*django/contrib/admin/static/admin' | xargs rm -rf
+includes:
+  - type: file
+    src: uwsgi.ini
+  - type: file
+    src: manage.py
+pack_program: tar
+pack_compress_program: pigz
