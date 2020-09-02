@@ -1,3 +1,4 @@
 Django
-PyMySQL
+mysqlclient
 django_static_collector
+dj-database-url
