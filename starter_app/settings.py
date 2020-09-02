@@ -8,16 +8,26 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
+
+Sections:
+
+- ## Django basic ##
+- ## Customized settings ##
+- ## Application definition ##
+- ## Database ##
+- ## Password validation ##
+- ## Logging ##
+- ## Internationalization ##
+- ## Static files (CSS, JavaScript, Images) ##
+- ## Rewrite and thiry party setup ##
 """
+
+## Django basic ##
 
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '%rop%my9(&2%9848_p(f)v)5rvv-+rt2!c!8zjzks8fxpurkhr'
@@ -25,10 +35,22 @@ SECRET_KEY = '%rop%my9(&2%9848_p(f)v)5rvv-+rt2!c!8zjzks8fxpurkhr'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
-# Application definition
+## Customized settings ##
+
+# Application environment name, examples: 'prod', 'uat', 'dev', 'local', 'prod.us', 'uat.hk'
+APP_ENV = None
+
+# Sentry settings
+SENTRY_DSN = None
+
+# REDIS_URL = 'redis://[:password]@localhost:6379/0'
+REDIS_URL = None
+
+
+## Application definition ##
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'starter_app',
 ]
 
 MIDDLEWARE = [
@@ -70,7 +93,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'starter_app.wsgi.application'
 
 
-# Database
+## Database ##
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
@@ -80,8 +103,11 @@ DATABASES = {
     }
 }
 
+# # Used with db_router module
+# DATABASE_ROUTERS = ['starter_app.db_router.DefaultRouter']
 
-# Password validation
+
+## Password validation ##
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -100,7 +126,67 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+## Logging ##
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'loggers': {
+        'mss': {
+            'handlers': ['stream'],
+            'level': 'INFO',
+        },
+        'mssapi': {
+            'handlers': ['stream'],
+            'level': 'INFO',
+        },
+        'msshelpers': {
+            'handlers': ['stream'],
+            'level': 'INFO',
+        },
+        'mssvendor': {
+            'handlers': ['stream'],
+            'level': 'INFO',
+        },
+        # Disable unnecessary 4xx log
+        'django.request': {
+            'level': 'ERROR',
+            'handlers': ['stream'],
+            'propagate': 0,
+        },
+        # 'django.db': {
+        #     'level': 'DEBUG',
+        #     'handlers': ['stream'],
+        #     'propagate': 0,
+        # },
+
+        # other third party libs
+        'requests': {
+            'level': 'WARNING',
+            'handlers': ['stream'],
+            'propagate': 0,
+        },
+        'apibox': {
+            'handlers': ['stream'],
+            'level': 'INFO',
+            'propagate': 0,
+        },
+    },
+    'handlers': {
+        'stream': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'common',
+        },
+    },
+    'formatters': {
+        'common': {
+            'format': LOG_FORMAT,
+            'datefmt': LOG_DATE_FORMAT,
+        },
+    },
+}
+
+
+## Internationalization ##
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
@@ -114,7 +200,58 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+## Static files (CSS, JavaScript, Images) ##
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Will be used for django_static_collector
+STATIC_ROOT = 'static'
+
+# # Determine the process of static collecting
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static_src'),
+# ]
+# STATICFILES_FINDERS = [
+#     'django.contrib.staticfiles.finders.FileSystemFinder',
+# ]
+
+## Rewrite and thiry party setup ##
+
+try:
+    import starter_app_settings_rewrite as rewrite
+
+    if hasattr(rewrite, 'end'):
+        print('* starter_app_settings_rewrite end affected')
+        rewrite.end(globals())
+except ImportError:
+    pass
+
+# Env rewrite
+_app_env = os.environ.get('APP_ENV')
+if _app_env:
+    APP_ENV = _app_env
+
+try:
+    import dj_database_url
+
+    _db_url = os.environ.get('DB_URL')
+    if _db_url:
+        _db_url_parsed = dj_database_url.parse(_db_url)
+        print('DB_URL parsed:', _db_url_parsed)
+        DATABASES['default'].update(_db_url_parsed)
+except ImportError:
+    pass
+
+_redis_url = os.environ.get('REDIS_URL')
+if _redis_url:
+    REDIS_URL = _redis_url
+
+# # Setup sentry
+# from starter_app.sentry_setup import setup_sentry
+# try:
+#     from release_version import release
+# except ImportError:
+#     release = None
+# setup_sentry(SENTRY_DSN, APP_ENV, release)
