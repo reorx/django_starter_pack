@@ -2,3 +2,6 @@ Django
 mysqlclient
 django_static_collector
 dj-database-url
+params
+arrow
+jsonschema
