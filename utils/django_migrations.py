@@ -13,9 +13,9 @@ class DeleteModelMigrator(object):
         # We get the model from the versioned app registry;
         # if we directly import it, it'll be the wrong version
         try:
-            ct = ContentType.objects.get(app_label='msscore', model=self.model_name)
+            ct = ContentType.objects.get(app_label='starter_app', model=self.model_name)
         except ContentType.DoesNotExist:
-            print("msscore %s not found, permission fix pass", self.model_name)
+            print("starter_app %s not found, permission fix pass", self.model_name)
         else:
             db_alias = schema_editor.connection.alias
             self.permissions = list(Permission.objects.using(db_alias).filter(content_type=ct).values())
@@ -27,7 +27,7 @@ class DeleteModelMigrator(object):
 
         # forwards_func() creates two Country instances,
         # so reverse_func() should delete them.
-        # ct = ContentType.objects.get(app_label='msscore', model='WireBankcard')
+        # ct = ContentType.objects.get(app_label='starter_app', model='WireBankcard')
         # db_alias = schema_editor.connection.alias
         if len(self.permissions):
             Permission.objects.bulk_create([Permission(**d) for d in self.permissions])
@@ -36,9 +36,9 @@ class DeleteModelMigrator(object):
         from django.contrib.admin.models import LogEntry
 
         try:
-            ct = ContentType.objects.get(app_label='msscore', model=self.model_name)
+            ct = ContentType.objects.get(app_label='starter_app', model=self.model_name)
         except ContentType.DoesNotExist:
-            print("msscore %s not found, permission fix pass", self.model_name)
+            print("starter_app %s not found, permission fix pass", self.model_name)
         else:
             qs = LogEntry.objects.filter(content_type=ct)
             logging.info('deleting %s admin logs', qs.count())

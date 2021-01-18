@@ -1,8 +1,8 @@
 # coding: utf-8
 from __future__ import print_function
-from msscore.utils import setup_django
+from starter_app.utils import setup_django
 
-setup_django('msscore')
+setup_django('starter_app')
 
 from django.db import connection
 from django.conf import settings

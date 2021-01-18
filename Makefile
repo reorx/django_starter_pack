@@ -1,5 +1,8 @@
 .PHONY: test build
 
+run-dev:
+	python manage.py runserver --nothreading 8000
+
 clean:
 	rm -rf build dist *.egg-info
 
@@ -8,9 +11,3 @@ test:
 
 build:
 	python setup.py build
-
-build-dist:
-	python setup.py sdist bdist_wheel
-
-publish: build-dist
-	python -m twine upload --skip-existing $(shell ls -t dist/*.whl | head -1)

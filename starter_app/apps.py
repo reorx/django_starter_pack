@@ -16,7 +16,6 @@ class AppConfig(BaseAppConfig):
 
         models_module = None
         for i in SUBAPPS:
-            models_module_name = '{}.{}.models'.format(self.name, i)
-            models_module = import_module(models_module_name)
+            models_module = import_module(f'{self.name}.{i}.models')
 
         self.models_module = models_module

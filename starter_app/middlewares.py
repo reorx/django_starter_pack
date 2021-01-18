@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import params
 from typing import Tuple, Optional
 
-from .log import app_log
+from .log import app_lg
 from .errors import API_ERROR_CODE
 from . import errors
 
@@ -39,12 +39,39 @@ def parse_invalid_params(e: params.InvalidParams):
 json_dumps_params = {'ensure_ascii': False}
 
 
+no_auth_urls = [
+    '/login',
+    '/logout',
+]
+
+no_auth_url_prefixes = [
+    '/admin',
+]
+
+
 class ResponseMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         print('init middleware')
 
     def __call__(self, request):
+
+        # get user, note that we don't use `.user` to avoid conflict with django auth
+        # request.app_user = auth.get_user()
+
+        # check auth
+        #need_auth = True
+        #if request.path in no_auth_urls:
+        #    need_auth = False
+        #else:
+        #    for prefix in no_auth_url_prefixes:
+        #        if request.path.startswith(prefix):
+        #            need_auth = False
+        #            break
+
+        #if need_auth and not request.app_user.is_authenticated:
+        #    return auth.redirect_to_login(request)
+
         return self.get_response(request)
 
     def process_exception(self, request, e):
@@ -57,7 +84,7 @@ class ResponseMiddleware:
         if status is None:
             if settings.DEBUG is True:
                 raise
-            app_log.exception(str(e))
+            app_lg.exception(str(e))
             status, code = 500, API_ERROR_CODE.INTERNAL_ERROR
         d = {
             'status': 'error',

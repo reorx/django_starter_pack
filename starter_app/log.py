@@ -1,4 +1,4 @@
 import logging
 
 
-app_log = logging.getLogger('starter_app')
+app_lg = logging.getLogger('starter_app')

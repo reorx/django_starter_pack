@@ -1,3 +1,4 @@
+# flake8: noqa
 """
 Django settings for starter_app project.
 
@@ -37,6 +38,8 @@ SECRET_KEY = '%rop%my9(&2%9848_p(f)v)5rvv-+rt2!c!8zjzks8fxpurkhr'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+ADMIN_TITLE = 'starter_app Admin'
 
 
 ## Customized settings ##

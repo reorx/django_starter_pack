@@ -51,7 +51,7 @@ setup(
     description='',
     url='',
     long_description=get_long_description(),
-    long_description_content_type='text/markdown'
+    long_description_content_type='text/markdown',
     packages=[
         'starter_app',
         'starter_app/_module'

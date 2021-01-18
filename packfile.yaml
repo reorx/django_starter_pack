@@ -10,7 +10,7 @@ build_dir: build
 dist_dir: dist
 pre_script: |
     echo "release = '{version}'" > {build_path}/release_version.py
-    {python[venv_path]}/bin/django-static-collector mt_backend.settings
+    {python[venv_path]}/bin/django-static-collector starter_app.settings
 post_script: |
   find {build_path} -type d -path '*django*locale/*' ! -path '*locale/en/*' ! -path '*locale/en' | xargs rm -rf
   find {build_path} -type d -path '*django/contrib/admin/static/admin' | xargs rm -rf
