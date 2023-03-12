@@ -1,4 +1,4 @@
-from .utils.enum import SimpleEnum, KV
+from ..utils.enum import SimpleEnum, KV
 
 
 class AppError(Exception):

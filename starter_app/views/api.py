@@ -5,7 +5,7 @@ from ..contact.models import Contact
 from ..contact import api as contact_api
 from ..utils.models_formatter import make_model_formatter, make_model_encoder
 from ..utils.models_paginator import PaginatorParams, paginate_queryset
-from ..utils.views import JSONView
+from ..lib.views import JSONView
 #from ..schemas.contact import validate_contact_schema
 
 

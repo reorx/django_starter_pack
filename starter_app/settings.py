@@ -82,7 +82,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'starter_app.middlewares.ResponseMiddleware',
+    'starter_app.lib.middlewares.ResponseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -102,7 +102,7 @@ TEMPLATES = [
         ],
         'APP_DIRS': True,
         'OPTIONS': {
-            'environment': 'starter_app.jinja2.environment',
+            'environment': 'starter_app.lib.jinja2.environment',
         },
     },
     {
