@@ -23,7 +23,6 @@ Sections:
 - ## Static files (CSS, JavaScript, Images) ##
 """
 
-import os
 import logging
 from pathlib import Path
 from .utils.settings import EnvBase
@@ -43,8 +42,9 @@ class Env(EnvBase):
 
 ## Django basic ##
 
+APP_DIR = Path(__file__).resolve().parent
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = APP_DIR.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '%rop%my9(&2%9848_p(f)v)5rvv-+rt2!c!8zjzks8fxpurkhr'
@@ -96,6 +96,16 @@ ROOT_URLCONF = 'starter_app.urls'
 
 TEMPLATES = [
     {
+        'BACKEND': 'django.template.backends.jinja2.Jinja2',
+        'DIRS': [
+            'templates',
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'environment': 'starter_app.jinja2.environment',
+        },
+    },
+    {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
@@ -123,6 +133,9 @@ DATABASES = {
     }
 }
 DATABASES['default'].update(Env._env.db('DB_URL'))
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 
 # # Used with db_router module
 # DATABASE_ROUTERS = ['starter_app.db_router.DefaultRouter']
