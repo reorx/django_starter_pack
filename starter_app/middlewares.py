@@ -14,7 +14,6 @@ from typing import Tuple, Optional
 from .log import lg
 from .errors import API_ERROR_CODE
 from . import errors
-from .utils.jinja import render
 
 
 def is_api_path(req):
@@ -102,17 +101,6 @@ class ResponseMiddleware:
     def process_exception(self, request, e):
         if is_api_path(request):
             return self.process_api_exception(request, e)
-        if isinstance(e, errors.PermissionDenied):
-            status_code = 403
-            return render(
-                request, 'error.html',
-                dict(
-                    exception_class=errors.PermissionDenied.__name__,
-                    status_code=status_code,
-                    username=request.user.username,
-                ),
-                status=status_code,
-            )
 
     def process_api_exception(self, request, e):
         msg = str(e)
