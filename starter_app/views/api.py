@@ -6,7 +6,7 @@ from ..contact import api as contact_api
 from ..utils.models_formatter import make_model_formatter, make_model_encoder
 from ..utils.models_paginator import PaginatorParams, paginate_queryset
 from ..utils.views import JSONView
-from ..schemas.contact import validate_contact_schema
+#from ..schemas.contact import validate_contact_schema
 
 
 class Status:
@@ -55,9 +55,9 @@ class ContactsInfoView(JSONView):
         return self.json_response(make_resp_data(c), encoder=contact_encoder)
 
 
-class ContactsCreateView(JSONView):
-    def post(self, request):
-        data = validate_contact_schema(self.json)
-        c = Contact(**data)
-        contact_api.create(c)
-        return self.json_response(make_resp_data(c), encoder=contact_encoder)
+#class ContactsCreateView(JSONView):
+#    def post(self, request):
+#        data = validate_contact_schema(self.json)
+#        c = Contact(**data)
+#        contact_api.create(c)
+#        return self.json_response(make_resp_data(c), encoder=contact_encoder)
