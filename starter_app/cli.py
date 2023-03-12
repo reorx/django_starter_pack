@@ -1,21 +1,21 @@
 import click
 import logging
-from utils.django_setup import setup_django
 
-setup_django('starter_app')
+from .utils.django_integration import setup_starter_app
 
-from starter_app.contact.models import Contact  # noqa
+setup_starter_app()
+
+from .log import lg, set_logger
+from .contact.models import Contact  # noqa
 
 
-lg = logging.getLogger('starter_app')
 
 
 @click.group()
 @click.option('-d', '--debug', is_flag=True)
 def cli(debug):
     if debug:
-        lg.setLevel(logging.DEBUG)
-        # logging.getLogger().setLevel(logging.DEBUG)
+        set_logger(lg, logging.DEBUG)
 
 
 @cli.command(help='list and show contacts')

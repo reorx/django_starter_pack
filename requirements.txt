@@ -1,7 +1,8 @@
 Django
 Jinja2
 mysqlclient
+django-environ==0.9.0
 django_static_collector
 params
 arrow
-django-environ==0.9.0
+click
