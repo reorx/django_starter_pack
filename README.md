@@ -7,3 +7,9 @@ A collection of power packs to boost and enhance Django development, including:
 - Utility functions
 
 > Docs will be updated in the future
+
+
+Modules to delete after copying:
+- utils/
+- starter_app/schemas/
+- starter_app/business/
