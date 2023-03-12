@@ -33,6 +33,7 @@ from .utils.settings import EnvBase
 class Env(EnvBase):
     DEBUG = (bool, True)
     DB_URL = (str, '')
+    FAKE_HEADER_AUTH = (bool, False)
     LOG_LEVEL_APP = (str, 'INFO')
     LOG_LEVEL_DB = (str, 'INFO')
 
@@ -51,6 +52,7 @@ SECRET_KEY = '%rop%my9(&2%9848_p(f)v)5rvv-+rt2!c!8zjzks8fxpurkhr'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = Env.DEBUG
+FAKE_HEADER_AUTH = Env.FAKE_HEADER_AUTH
 
 ALLOWED_HOSTS = ['*']
 
