@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 Sections:
 
+- ## Env ##
 - ## Django basic ##
 - ## Customized settings ##
 - ## Application definition ##
@@ -20,11 +21,25 @@ Sections:
 - ## Logging ##
 - ## Internationalization ##
 - ## Static files (CSS, JavaScript, Images) ##
-- ## Rewrite and thiry party setup ##
 """
 
 import os
+import logging
 from pathlib import Path
+from .utils.settings import EnvBase
+
+
+## Env ##
+
+class Env(EnvBase):
+    DEBUG = (bool, True)
+    DB_URL = (str, '')
+    LOG_LEVEL_APP = (str, 'INFO')
+    LOG_LEVEL_DB = (str, 'INFO')
+
+    class Meta:
+        env_file = 'starter_app.env'
+
 
 ## Django basic ##
 
@@ -35,7 +50,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '%rop%my9(&2%9848_p(f)v)5rvv-+rt2!c!8zjzks8fxpurkhr'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = Env.DEBUG
 
 ALLOWED_HOSTS = ['*']
 
@@ -107,6 +122,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+DATABASES['default'].update(Env._env.db('DB_URL'))
 
 # # Used with db_router module
 # DATABASE_ROUTERS = ['starter_app.db_router.DefaultRouter']
@@ -145,7 +161,7 @@ LOGGING = {
     'loggers': {
         'starter_app': {
             'handlers': ['stream'],
-            'level': 'INFO',
+            'level': getattr(logging, Env.LOG_LEVEL_APP),
         },
         # Disable unnecessary 4xx log
         'django.request': {
@@ -153,11 +169,11 @@ LOGGING = {
             'handlers': ['stream'],
             'propagate': 0,
         },
-        # 'django.db': {
-        #     'level': 'DEBUG',
-        #     'handlers': ['stream'],
-        #     'propagate': 0,
-        # },
+        'django.db': {
+            'level': getattr(logging, Env.LOG_LEVEL_DB),
+            'handlers': ['stream'],
+            'propagate': 0,
+        },
 
         # other third party libs
         'requests': {
@@ -211,42 +227,3 @@ STATIC_ROOT = 'static'
 # STATICFILES_FINDERS = [
 #     'django.contrib.staticfiles.finders.FileSystemFinder',
 # ]
-
-## Rewrite and thiry party setup ##
-
-try:
-    import starter_app_settings_rewrite as rewrite
-
-    if hasattr(rewrite, 'end'):
-        print('* starter_app_settings_rewrite end affected')
-        rewrite.end(globals())
-except ImportError:
-    pass
-
-# Env rewrite
-_app_env = os.environ.get('APP_ENV')
-if _app_env:
-    APP_ENV = _app_env
-
-try:
-    import dj_database_url
-
-    _db_url = os.environ.get('DB_URL')
-    if _db_url:
-        _db_url_parsed = dj_database_url.parse(_db_url)
-        print('DB_URL parsed:', _db_url_parsed)
-        DATABASES['default'].update(_db_url_parsed)
-except ImportError:
-    pass
-
-_redis_url = os.environ.get('REDIS_URL')
-if _redis_url:
-    REDIS_URL = _redis_url
-
-# # Setup sentry
-# from starter_app.sentry_setup import setup_sentry
-# try:
-#     from release_version import release
-# except ImportError:
-#     release = None
-# setup_sentry(SENTRY_DSN, APP_ENV, release)

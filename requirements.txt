@@ -1,7 +1,7 @@
 Django
+Jinja2
 mysqlclient
 django_static_collector
-dj-database-url
 params
 arrow
-jsonschema
+django-environ==0.9.0
