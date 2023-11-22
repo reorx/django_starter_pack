@@ -142,7 +142,24 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-DATABASES['default'].update(Env._env.db('DB_URL'))
+if Env.DB_URL:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'starter_app',
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '127.0.0.1',
+            # https://docs.djangoproject.com/en/4.2/ref/databases/#persistent-connections
+            'CONN_MAX_AGE': 60 * 5,
+            'OPTIONS': {
+                'init_command': "SET default_storage_engine=INNODB, sql_mode='STRICT_TRANS_TABLES';",
+                'charset': 'utf8mb4',
+            }
+        },
+    }
+    # Env._env.db is the django-environ method to get parsed db config
+    DATABASES['default'].update(Env._env.db('DB_URL'))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
