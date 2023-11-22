@@ -56,6 +56,14 @@ FAKE_HEADER_AUTH = Env.FAKE_HEADER_AUTH
 
 ALLOWED_HOSTS = ['*']
 
+# https://docs.djangoproject.com/en/4.2/ref/settings/#secure-proxy-ssl-header
+# required when serving behind a nginx, and the nginx must have `proxy_set_header X-Forwarded-Proto $scheme;` set
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# https://docs.djangoproject.com/en/4.2/ref/settings/#csrf-trusted-origins
+# only necessary if CSRF actually happens, e.g. request foo.example.com on example.com
+#CSRF_TRUSTED_ORIGINS = ['https://*.example.com']
+
 ADMIN_TITLE = 'starter_app Admin'
 
 
