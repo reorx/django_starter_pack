@@ -7,22 +7,30 @@ A collection of power packs to boost and enhance Django development, including:
 - Utility functions
 
 
-> Docs will be updated in the future
+## Initilization
 
+1. migrate database and create superuser
 
-Modules to delete after copying:
-- utils/
-- starter_app/schemas/
-- starter_app/business/
-- starter_app/utils/json_schema.py
-- starter_app/utils/jinja.py
+  ```
+  python manage.py migrate
+  python manage.py createsuperuser
+  ```
+2. run server
 
+  ```
+  python manage.py runserver
+  ```
+3. open http://localhost:8000/admin/ and login with superuser
+4. create a new Org, then create a new user to join the org
+5. test login API with the new user
 
-## Hierarchy
+  ```
+  ./curlapi.sh /auth/login -X POST -d '{"username":"youruser","password":"yourpass"}'
+  ```
+6. test other APIs
 
-- starter_app/
-  - lib/
-
-    modules that provide django related support,
-    similar to url.py, admin.py and wsgi.py, but they are not mandatory to put in the app dir.
-    the purpose is to make app dir clearer.
+  ```
+  ./curlapi.sh /org/list
+  ./curlapi.sh /group/list
+  ./curlapi.sh /user/list
+  ```

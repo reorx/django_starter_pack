@@ -1,9 +1,11 @@
-from django.apps import AppConfig as BaseAppConfig
 from importlib import import_module
+
+from django.apps import AppConfig as BaseAppConfig
 
 
 SUBAPPS = [
     'subapp',
+    'org',
 ]
 
 

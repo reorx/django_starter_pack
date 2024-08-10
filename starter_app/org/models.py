@@ -12,7 +12,7 @@ from ..consts.permission import Permission
 
 class Org(PublicIdMixin, DatetimeMixin):
     name = CharField(max_length=64, unique=True)
-    type = IntegerField(default=0)  # 0: normal; 1: regulator
+    type = IntegerField(default=0)
     is_active = BooleanField(default=True)
     description = TextField(default='', blank=True)
 
@@ -65,20 +65,18 @@ def create_default_org_groups(sender, instance, created, **kwargs):
 
 class User(PublicIdMixin, DatetimeMixin):
     org = models.ForeignKey(Org, on_delete=models.DO_NOTHING)
-    # NOTE for user registered from wechat, username is None
     username = models.CharField(
         max_length=150,
         unique=True,
-        null=True,
         help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
         validators=[username_validator],
     )
     password_hash = models.CharField(max_length=128)
 
     # profile:
-    email = CharField(max_length=64, null=True)
-    display_name = models.CharField(max_length=64, null=True)
-    phone = models.CharField(max_length=32, null=True)
+    email = CharField(max_length=64, null=True, blank=True)
+    display_name = models.CharField(max_length=64, null=True, blank=True)
+    phone = models.CharField(max_length=32, null=True, blank=True)
     inviter = models.ForeignKey('self', on_delete=models.DO_NOTHING, null=True, blank=True)
 
     # status:

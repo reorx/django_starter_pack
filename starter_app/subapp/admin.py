@@ -6,8 +6,8 @@ from .models import LogicUnit
 @admin.register(LogicUnit)
 class LogicUnitAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', )
-    list_display = ('id', 'email', 'company', 'created_at', 'updated_at', )
-    update_fields = ['email', 'company', 'updated_at']
+    list_display = ('id', 'name', 'created_at', 'updated_at', )
+    update_fields = ['name', 'updated_at']
 
     def get_readonly_fields(self, request, obj=None):
         if obj:

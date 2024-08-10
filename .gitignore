@@ -1,1 +1,2 @@
 *.sqlite3
+.api_auth_token

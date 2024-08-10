@@ -4,7 +4,7 @@ from json import JSONEncoder
 from django.http import JsonResponse
 from pydantic import BaseModel
 
-from ..utils.time import TIME_FORMATS, format_time
+from ..utils.time import TIME_FORMATS, datetime2ts, format_time
 
 
 class CustomJSONEncoder(JSONEncoder):
@@ -17,7 +17,7 @@ class CustomJSONEncoder(JSONEncoder):
 
         if isinstance(o, datetime.datetime):
             # Assume this object has `tzinfo` or is a UTC time
-            return format_time(o)
+            return datetime2ts(o)
         if isinstance(o, datetime.date):
             return format_time(o, TIME_FORMATS.YMD)
         if isinstance(o, BaseModel):
