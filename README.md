@@ -15,6 +15,7 @@ A collection of power packs to boost and enhance Django development, including:
   ```
   rsync -avr --exclude venv --exclude test --exclude .git --exclude __pycache__ django_starter_pack $destination
   ```
+3. replace all `starter_app` with new package name
 
 
 ## Initilization
