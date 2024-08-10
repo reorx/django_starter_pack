@@ -1,9 +1,9 @@
 import click
 import logging
 
-from .utils.django_integration import setup_starter_app
+from .utils.django_integration import setup_django
 
-setup_starter_app()
+setup_django()
 
 from .log import lg, set_logger
 from .subapp.models import LogicUnit # noqa
