@@ -1,0 +1,26 @@
+
+{% macro input_error(formErrors, key, msg, type='default') -%}
+  {% if key in formErrors %}
+    <div class="input-feedback error">
+      {% if type == 'default' %}
+        * {{msg|default('invalid input')}}
+      {% else %}
+        * 错误: {{formErrors[key]}}
+      {% endif %}
+    </div>
+  {% endif %}
+{%- endmacro %}
+
+{% macro input_row(formData, formErrors, label, key, type='text', placeholder='', is_required=True, error_msg='') -%}
+<div class="input-group">
+  <label>{{label}}</label>
+  <input
+    type="{{type}}"
+    name="{{key}}"
+    value="{{formData.get(key, '')}}"
+    placeholder="{{placeholder}}"
+    {% if is_required %}required{% endif %}
+  >
+  {{ input_error(formErrors, key, error_msg) }}
+</div>
+{%- endmacro %}

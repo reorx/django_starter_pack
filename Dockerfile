@@ -18,7 +18,7 @@ RUN pip install -r requirements.txt
 
 # add app
 ADD *.py .
-ADD campus_watch ./campus_watch
+ADD starter_app ./starter_app
 ADD uwsgi.ini .
 
 # collect static files

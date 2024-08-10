@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% import 'macros/form.html' as form %}
+{% block title %}登录{% endblock %}
+
+{% block head %}
+<style>
+  .container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 1em;
+  }
+  .title {
+    text-align: center;
+  }
+  .callout {
+    margin: 1.5em 0;
+  }
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .user-info > img {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+  }
+
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .input-qr-container {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+  }
+
+  .input-container {
+    margin-bottom: 10px;
+  }
+
+  .qrcode {
+    display: flex;
+    margin-top: 15px;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
+{% endblock %}
+
+{% set formData = formData or {} %}
+{% set formErrors = formErrors or {} %}
+
+{% block body %}
+<div class="container">
+  <h1 class="title">登录 | 校安卫士</h1>
+
+  <form method="post" class="form-container">
+    <div class="input-qr-container">
+        <div class="input-container">
+            {{ form.input_row(formData, formErrors, '用户名', 'username') }}
+            {{ form.input_row(formData, formErrors, '密码', 'password',  type='password') }}
+        </div>
+    </div>
+    <button type="submit" class="button primary">提交</button>
+  </form>
+</div>
+{% endblock %}

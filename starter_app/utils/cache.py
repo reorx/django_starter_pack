@@ -3,7 +3,7 @@ from django.core.cache import cache
 import logging
 
 
-lg = logging.getLogger('dwtoolkit.cache')
+lg = logging.getLogger('app.cache')
 
 
 def cached_func(key, timeout):

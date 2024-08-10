@@ -3,7 +3,7 @@ from importlib import import_module
 
 
 SUBAPPS = [
-    'contact',
+    'subapp',
 ]
 
 

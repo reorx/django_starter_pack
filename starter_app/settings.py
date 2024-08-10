@@ -23,22 +23,34 @@ Sections:
 - ## Static files (CSS, JavaScript, Images) ##
 """
 
-import logging
+import os
 from pathlib import Path
-from .utils.settings import EnvBase
+
+from .utils.settings_env import EnvBase
 
 
 ## Env ##
 
 class Env(EnvBase):
     DEBUG = (bool, True)
-    DB_URL = (str, '')
-    FAKE_HEADER_AUTH = (bool, False)
+    APP_ENV = (str, 'local')
+    APP_BASE_URL = (str, 'http://localhost:3000')
+    DB_URL = (str, '')  # not directly used, get db config by Env._env.db('DB_URL')
+    REDIS_URL = (str, 'redis://127.0.0.1:6379/1')
     LOG_LEVEL_APP = (str, 'INFO')
     LOG_LEVEL_DB = (str, 'INFO')
+    LOG_FORMATTER_JSON = (bool, False)
+    MEDIA_DIR = (str, '')
+    # huey
+    HUEY_REDIS_URL = (str, 'redis://127.0.0.1:6379/2')
+    HUEY_WORKERS = (int, 2)
+    RUN_HUEY = (bool, False)
+    DOCKER_STACK_TASK_SLOT = (str, '')
+    # sentry
+    SENTRY_DSN = (str, '')
 
     class Meta:
-        env_file = 'starter_app.env'
+        env_file = os.environ.get('ENV_FILE', 'starter_app.env')
 
 
 ## Django basic ##
@@ -52,7 +64,6 @@ SECRET_KEY = '%rop%my9(&2%9848_p(f)v)5rvv-+rt2!c!8zjzks8fxpurkhr'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = Env.DEBUG
-FAKE_HEADER_AUTH = Env.FAKE_HEADER_AUTH
 
 ALLOWED_HOSTS = ['*']
 
@@ -62,21 +73,23 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # https://docs.djangoproject.com/en/4.2/ref/settings/#csrf-trusted-origins
 # only necessary if CSRF actually happens, e.g. request foo.example.com on example.com
-#CSRF_TRUSTED_ORIGINS = ['https://*.example.com']
+if not DEBUG:
+    CSRF_TRUSTED_ORIGINS = ['https://*.example.com']
 
 ADMIN_TITLE = 'starter_app Admin'
 
 
 ## Customized settings ##
 
-# Application environment name, examples: 'prod', 'uat', 'dev', 'local', 'prod.us', 'uat.hk'
-APP_ENV = None
+AUTH_TOKEN_SECRET = '9c56198d2889486914ec2f068f16694bf61291f0b61d33975e79dec2f3ffa21f'
+AUTH_TOKEN_EXPIRES_IN = 60 * 60 * 24 * 7  # 7 days
+AUTH_TOKEN_RESPONSE_HEADER_KEY = 'X-Auth-Token'
+AUTH_TOKEN_COOKIE_KEY = 'auth-token'
 
-# Sentry settings
-SENTRY_DSN = None
+INTERNAL_AUTH_HEADER = 'X-Internal-Auth'
+INTERNAL_AUTH_TOKEN = '36023984148db24d221c8001f760a4d3'
 
-# REDIS_URL = 'redis://[:password]@localhost:6379/0'
-REDIS_URL = None
+EXTERNAL_USER_HEADER = 'X-External-User'
 
 
 ## Application definition ##
@@ -96,25 +109,15 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'starter_app.middlewares.AdminAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'starter_app.lib.middlewares.ResponseMiddleware',
+    'starter_app.middlewares.ResponseMiddleware',
 ]
 
 ROOT_URLCONF = 'starter_app.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.jinja2.Jinja2',
-        'DIRS': [
-            'templates',
-        ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'environment': 'starter_app.lib.jinja2.environment',
-        },
-    },
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
@@ -160,12 +163,65 @@ if Env.DB_URL:
     }
     # Env._env.db is the django-environ method to get parsed db config
     DATABASES['default'].update(Env._env.db('DB_URL'))
+print('settings.DATABASES:', DATABASES)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
-# # Used with db_router module
-# DATABASE_ROUTERS = ['starter_app.db_router.DefaultRouter']
+## Cache ##
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        # 'LOCATION': 'unique-snowflake',
+    }
+}
+if Env.REDIS_URL:
+    CACHES = {
+        "default": {
+            # use https://github.com/jazzband/django-redis to have more features like getting raw redis client
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": Env.REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+            "KEY_PREFIX": "cache",
+        },
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+
+## Tasks Queue ##
+
+huey_periodic = True
+if Env.DOCKER_STACK_TASK_SLOT:
+    huey_periodic = Env.DOCKER_STACK_TASK_SLOT == '1'
+    print(f'Running as docker stack task slot: {Env.DOCKER_STACK_TASK_SLOT}, enable periodic task for huey: {huey_periodic}')
+
+# https://huey.readthedocs.io/en/latest/contrib.html#django
+HUEY = {
+    'name': 'starter_app',
+    'immediate': False,
+    'connection': {
+        'url': Env.HUEY_REDIS_URL,
+    },
+    # Huey uses UTC by default, but if UTC is set to False, huey uses datetime.datetime.now(),
+    # which is the local timezone rather that django settings TIME_ZONE,
+    # may cause confusion in django related code, so it's better not to use utc False,
+    # either convert time to UTC before passing to crontab(), or implement a new crontab function
+    # that uses django TIME_ZONE.
+    # 'utc': False
+    'consumer': {
+        'workers': Env.HUEY_WORKERS,
+        # ref: https://huey.readthedocs.io/en/latest/consumer.html#multiple-consumers
+        # Huey is typically run on a single server, with the number of workers scaled-up according to your applications workload. However, it is also possible to run multiple Huey consumers across multiple servers. When running multiple consumers, it is crucial that only one consumer be configured to enqueue periodic tasks.
+        'periodic': huey_periodic,
+        # ref: https://huey.readthedocs.io/en/latest/consumer.html#worker-types
+        # it's ok to use gevent now https://www.gevent.org/,
+        # since it's not 6 years ago when it only supports python 2,
+        # right now we start with process for simplity and robustness
+        'worker_type': 'process',
+    }
+}
 
 
 ## Password validation ##
@@ -195,22 +251,40 @@ LOG_FORMAT = '%(asctime)s  %(levelname)s  %(name)-10s  %(message)s'
 # LOG_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
 LOG_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
+LOG_LEVEL_APP = Env.LOG_LEVEL_APP
+LOG_LEVEL_DB = Env.LOG_LEVEL_DB
+log_formatter = 'common'
+if Env.LOG_FORMATTER_JSON or not DEBUG:
+    log_formatter = 'json'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'loggers': {
-        'starter_app': {
+        'app': {
             'handlers': ['stream'],
-            'level': getattr(logging, Env.LOG_LEVEL_APP),
+            'level': LOG_LEVEL_APP,
         },
+        'app.sql': {
+            'handlers': ['stream'],
+            'level': LOG_LEVEL_DB,
+            'propagate': 0,
+        },
+
         # Disable unnecessary 4xx log
         'django.request': {
             'level': 'ERROR',
             'handlers': ['stream'],
             'propagate': 0,
         },
-        'django.db': {
-            'level': getattr(logging, Env.LOG_LEVEL_DB),
+
+        'django.db.backends': {
+            'level': LOG_LEVEL_DB,
+            'handlers': ['stream'],
+            'propagate': 0,
+        },
+        # change level here if we want to see schema SQL like CREATE TABLE, ALTER TABLE, etc.
+        'django.db.backends.schema': {
+            'level': 'INFO',
             'handlers': ['stream'],
             'propagate': 0,
         },
@@ -227,11 +301,22 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'common',
         },
+        'sql': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'common',
+            'level': 'DEBUG',
+        },
     },
     'formatters': {
         'common': {
             'format': LOG_FORMAT,
             'datefmt': LOG_DATE_FORMAT,
+        },
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+            'datefmt': LOG_DATE_FORMAT,
+            'json_ensure_ascii': False,
         },
     },
 }
@@ -241,14 +326,19 @@ LOGGING = {
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'zh-Hans'
 
 TIME_ZONE = 'UTC'
+# TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
 USE_TZ = True
+
+MEDIA_ROOT = os.path.join(Env.MEDIA_DIR, 'media')
+MEDIA_URL = "/upload/"
 
 
 ## Static files (CSS, JavaScript, Images) ##
@@ -267,3 +357,48 @@ STATIC_ROOT = 'static'
 # STATICFILES_FINDERS = [
 #     'django.contrib.staticfiles.finders.FileSystemFinder',
 # ]
+
+
+# Sentry #
+
+SENTRY_DSN = Env.SENTRY_DSN
+
+# Only set up Sentry when SENTRY_DSN is passed. This ensures that when developing in a local environment and running tests, Sentry won't be involved.
+if SENTRY_DSN:
+    print('\n* Setting up sentry')
+    # isort: off
+    import sentry_sdk
+    import logging
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.integrations.huey import HueyIntegration
+    from sentry_sdk.integrations.logging import ignore_logger
+
+    if Env.RUN_HUEY:
+        # HueyIntegration understands huey's control flow exceptions like RetryTask, so that errors are not reported when tasks are retried
+        framework_integration = HueyIntegration()
+        # ignore huey logger because exception captured by Huey.execute will be passed to logger.exception()
+        ignore_logger('huey')
+        print('* Sentry uses HueyIntegration\n')
+    else:
+        # https://docs.sentry.io/platforms/python/integrations/django/
+        framework_integration = DjangoIntegration()
+        print('* Sentry uses DjangoIntegration\n')
+
+    # https://docs.sentry.io/platforms/python/configuration/options/
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            framework_integration,
+            # https://docs.sentry.io/platforms/python/integrations/logging/
+            LoggingIntegration(
+                level=logging.INFO,         # Capture info and above as breadcrumbs
+                event_level=logging.ERROR   # Send records as events
+            ),
+        ],
+        enable_tracing=True,
+        auto_session_tracking=False,
+        traces_sample_rate=0.01,
+        # release="1.0.0",
+        environment=APP_ENV,
+    )

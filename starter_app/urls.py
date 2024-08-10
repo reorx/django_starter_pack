@@ -1,35 +1,37 @@
-"""starter_app URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from django.conf.urls.static import static
+from django.conf import settings
 
-from starter_app.views import api, web
+from ninja import Router
+
+from .org.routes import auth
+from .base.security import UserAuth
+from .ninja_api import ninja
+from .org.routes import group, org, user
+
+
+# ninja routers
+api_router = Router(auth=UserAuth())
+
+# org.routes
+api_router.add_router('/auth', auth.router)
+api_router.add_router('/group', group.router)
+api_router.add_router('/user', user.router)
+api_router.add_router('/org', org.router)
+
+# add routers to ninja
+ninja.add_router('/api', api_router)
+
+# django urls #
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-
-    # web
-    # path('', web.HomeView.as_view())
-    # path('contacts', web.ContactsView.as_view())
-    # path('contacts/<id>', web.ContactsView.as_view())
-
     # api
-    path('api/', include([
-        path('contacts.list', api.ContactsListView.as_view()),
-        path('contacts.info', api.ContactsInfoView.as_view()),
-        path('contacts.create', api.ContactsCreateView.as_view()),
-    ]))
+    path('', ninja.urls),
+
+    # admin
+    path('admin/', admin.site.urls),
 ]
+
+# media
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

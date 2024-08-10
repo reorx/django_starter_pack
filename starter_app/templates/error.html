@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ error }}{% endblock %}
+
+{% block head %}
+<style>
+  .title {
+    text-align: center;
+  }
+  .callout {
+    margin: 1.5em 0;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+  <h1 class="title">{{ error }}</h1>
+
+  <div class="callout error">
+    请联系管理员获得支持。
+    {% if detail %}
+    错误信息:
+    <pre><code>{{ detail }}</code></pre>
+    {% endif %}
+  </div>
+{% endblock %}

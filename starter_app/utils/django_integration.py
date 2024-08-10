@@ -1,15 +1,17 @@
 import os
+
 import django
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'starter_app.settings')
 
 
-def setup_starter_app():
+def setup_django(check_models=False):
     django.setup()
 
     # ensure ORM is usable
-    from django.contrib.auth.models import User
+    if check_models:
+        from django.contrib.auth.models import User
 
-    count = User.objects.count()
-    print(f'* dwtoolkit integration successful, users count: {count}')
+        count = User.objects.count()
+        print(f'* starter_app django integration successful, users count: {count}')

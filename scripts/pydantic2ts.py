@@ -313,7 +313,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    from campus_watch.utils.django_integration import setup_django
-
-    setup_django()
     main()
