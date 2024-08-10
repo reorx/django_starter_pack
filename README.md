@@ -7,6 +7,16 @@ A collection of power packs to boost and enhance Django development, including:
 - Utility functions
 
 
+## How to use
+
+1. clone the repo
+2. copy to destination:
+
+  ```
+  rsync -avr --exclude venv --exclude test --exclude .git --exclude __pycache__ django_starter_pack $destination
+  ```
+
+
 ## Initilization
 
 1. migrate database and create superuser
