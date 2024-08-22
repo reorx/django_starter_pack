@@ -35,17 +35,25 @@ class Env(EnvBase):
     DEBUG = (bool, True)
     APP_ENV = (str, 'local')
     APP_BASE_URL = (str, 'http://localhost:3000')
+    MEDIA_DIR = (str, '')
+
+    # Connections
+    ## Database
     DB_URL = (str, '')  # not directly used, get db config by Env._env.db('DB_URL')
+    ## Redis
     REDIS_URL = (str, 'redis://127.0.0.1:6379/1')
+
+    # Logging
     LOG_LEVEL_APP = (str, 'INFO')
     LOG_LEVEL_DB = (str, 'INFO')
     LOG_FORMATTER_JSON = (bool, False)
-    MEDIA_DIR = (str, '')
+
     # huey
     HUEY_REDIS_URL = (str, 'redis://127.0.0.1:6379/2')
     HUEY_WORKERS = (int, 2)
     RUN_HUEY = (bool, False)
     DOCKER_STACK_TASK_SLOT = (str, '')
+
     # sentry
     SENTRY_DSN = (str, '')
 
@@ -401,5 +409,5 @@ if SENTRY_DSN:
         auto_session_tracking=False,
         traces_sample_rate=0.01,
         # release="1.0.0",
-        environment=APP_ENV,
+        environment=Env.APP_ENV,
     )
