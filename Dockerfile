@@ -1,5 +1,5 @@
 # pull official base image
-FROM registry.cn-beijing.aliyuncs.com/campuswatch-base/python:3.10
+FROM python:3.10
 
 # set working directory
 WORKDIR /app

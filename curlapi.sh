@@ -29,7 +29,7 @@ fi
 
 # If the first argument equals to "/auth/login"
 if [ "${RELATIVE_URL}" == "/auth/login" ]; then
-    # Get the token and save it to /tmp/campus_watch_auth_token
+    # Get the token and save it to file
     response=$(curl -s -i "$FULL_URL" "$@")
     greped_header=$(echo "$response" | grep -Fi X-Auth-Token)
     if [ $? -ne 0 ]; then
