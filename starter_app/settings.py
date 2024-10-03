@@ -128,6 +128,14 @@ ROOT_URLCONF = 'starter_app.urls'
 
 TEMPLATES = [
     {
+        'BACKEND': 'django.template.backends.jinja2.Jinja2',
+        'DIRS': ['./starter_app/templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'environment': 'starter_app.lib.jinja2.environment',
+        },
+    },
+    {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
